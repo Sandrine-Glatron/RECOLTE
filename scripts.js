@@ -1742,7 +1742,7 @@ function showSearchModal() {
   showToast('Recherche - Tapez dans la console: zoomToJardin("nom_du_jardin")', 'info', 5000);
 }
 
-// Fonction pour afficher le formulaire de contact
+// Fonction pour afficher le formulaire de contact avec EmailJS
 function showContactForm() {
   const contactModal = document.createElement('div');
   contactModal.className = 'modal-overlay';
@@ -1832,40 +1832,109 @@ function showContactForm() {
   
   document.body.appendChild(contactModal);
   
-  // Gestionnaire de soumission du formulaire
+  // ✅ GESTIONNAIRE DE SOUMISSION AVEC EMAILJS
   document.getElementById('contactForm').addEventListener('submit', function(e) {
     e.preventDefault();
+    
+    // Afficher le loader pendant l'envoi
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalBtnContent = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i data-lucide="loader"></i> Envoi en cours...';
+    submitBtn.disabled = true;
+    lucide.createIcons();
     
     // Récupérer les données du formulaire
     const formData = new FormData(this);
     const contactData = {
       name: formData.get('name'),
       email: formData.get('email'),
-      phone: formData.get('phone'),
+      phone: formData.get('phone') || 'Non renseigné',
       subject: formData.get('subject'),
-      gardenInfo: formData.get('gardenInfo'),
+      gardenInfo: formData.get('gardenInfo') || 'Aucune information fournie',
       message: formData.get('message'),
-      newsletter: formData.get('newsletter') ? true : false,
-      timestamp: new Date().toISOString()
+      newsletter: formData.get('newsletter') ? 'Oui' : 'Non',
+      timestamp: new Date().toLocaleString('fr-FR')
     };
-    
-    // Simulation d'envoi (ici vous ajouteriez l'envoi vers votre serveur)
-    console.log('Données de contact à envoyer:', contactData);
-    
-    // Afficher un message de confirmation
-    showToast('Message envoyé avec succès ! Nous vous répondrons dans les plus brefs délais.', 'success', 5000);
-    contactModal.remove();
-    
-    // Ici vous pourriez ajouter l'envoi réel vers un serveur
-    // fetch('/api/contact', { 
-    //   method: 'POST', 
-    //   headers: {'Content-Type': 'application/json'},
-    //   body: JSON.stringify(contactData)
-    // });
+
+    // ✅ CONFIGURATION EMAILJS - REMPLACEZ PAR VOS VRAIES CLÉS
+    const EMAIL_CONFIG = {
+      serviceID: 'service_02zylod',      // ⚠️ À remplacer
+      templateID: 'template_mx6j3mi',    // ⚠️ À remplacer
+      publicKey: '0aupTGY69X7AZIVko'       // ⚠️ À remplacer
+    };
+
+    // Préparer les données pour EmailJS
+    const emailParams = {
+      from_name: contactData.name,
+      from_email: contactData.email,
+      phone: contactData.phone,
+      subject: contactData.subject,
+      garden_info: contactData.gardenInfo,
+      message: contactData.message,
+      newsletter: contactData.newsletter,
+      timestamp: contactData.timestamp,
+      formatted_subject: `[Jardins Strasbourg] ${contactData.subject.replace(/[🌱🤝📝💼🔧ℹ️💡]/g, '').trim()}`
+    };
+
+    // ✅ ENVOI AVEC EMAILJS
+    if (typeof emailjs !== 'undefined') {
+      emailjs.send(
+        EMAIL_CONFIG.serviceID,
+        EMAIL_CONFIG.templateID,
+        emailParams,
+        EMAIL_CONFIG.publicKey
+      )
+      .then(function(response) {
+        console.log('✅ Email envoyé avec succès !', response.status, response.text);
+        showToast('Message envoyé avec succès ! Nous vous répondrons dans les plus brefs délais.', 'success', 5000);
+        contactModal.remove();
+        
+        // Sauvegarder localement (optionnel)
+        try {
+          const existingContacts = JSON.parse(localStorage.getItem('jardins_contacts') || '[]');
+          existingContacts.push(contactData);
+          localStorage.setItem('jardins_contacts', JSON.stringify(existingContacts));
+        } catch (error) {
+          console.warn('⚠️ Impossible de sauvegarder localement');
+        }
+      })
+      .catch(function(error) {
+        console.error('❌ Erreur lors de l\'envoi :', error);
+        showToast('Erreur lors de l\'envoi du message. Veuillez réessayer.', 'error', 7000);
+        
+        // Restaurer le bouton
+        submitBtn.innerHTML = originalBtnContent;
+        submitBtn.disabled = false;
+        lucide.createIcons();
+      });
+    } else {
+      // Fallback si EmailJS n'est pas disponible
+      console.error('❌ EmailJS non disponible');
+      showToast('Service d\'email non disponible. Les données sont sauvegardées localement.', 'warning', 5000);
+      
+      // Sauvegarder quand même les données
+      console.log('Données de contact (fallback):', contactData);
+      contactModal.remove();
+      
+      submitBtn.innerHTML = originalBtnContent;
+      submitBtn.disabled = false;
+    }
   });
   
   // Réinitialiser les icônes Lucide dans le modal
   lucide.createIcons();
+}
+
+// ✅ INITIALISATION EMAILJS (à ajouter dans votre DOMContentLoaded)
+function initEmailJS() {
+  const publicKey = 'YOUR_PUBLIC_KEY'; // ⚠️ À remplacer par votre vraie clé
+  
+  if (typeof emailjs !== 'undefined') {
+    emailjs.init(publicKey);
+    console.log('✅ EmailJS initialisé avec succès');
+  } else {
+    console.error('❌ EmailJS non trouvé - vérifiez que le script est chargé');
+  }
 }
 
 function exportGardenData() {
