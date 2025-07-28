@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Evolution des jardins publics et analyse des récoltes dans les jardins privés</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Librairies externes -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- Police moderne Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Icônes Lucide -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+</head>
+<body>
+  <!-- Effet de particules en arrière-plan -->
+  <div class="particles" id="particles"></div>
+
+  <!-- Container pour les notifications toast -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Header modernisé avec contrôles -->
+  <header>
+        <div class="header-left">
+          <!-- Logo récolte à GAUCHE du titre -->
+          <img src="img/logo-recolte-vert.jpg" alt="Logo Récolte" class="header-logo">
+          
+          <!-- Icône centrale -->
+          <div class="logo-icon">
+            <i data-lucide="sprout"></i>
+          </div>
+          
+          <!-- Titre -->
+          <h1>Jardins de Strasbourg</h1>
+        </div>
+    
+    <div class="header-controls">
+      <!-- Toggle mode sombre -->
+      <div class="theme-toggle" id="themeToggle" title="Basculer le mode sombre"></div>
+      
+      <!-- Bouton recherche -->
+      <button class="btn btn-secondary" id="searchBtn">
+        <i data-lucide="search"></i>
+        Rechercher
+      </button>
+      
+      <!-- Bouton géolocalisation -->
+      <button class="btn btn-secondary" id="locationBtn">
+        <i data-lucide="map-pin"></i>
+        Ma position
+      </button>
+
+      <!-- Bouton de formulaire de contact -->
+      <button class="btn btn-secondary" id="contactBtn">
+        <i data-lucide="mail"></i>
+        Contact
+      </button>
+
+      <!-- Bouton d'exportation des données -->
+      <button class="btn btn-secondary" id="exportBtn">
+        <i data-lucide="download"></i>
+        Exporter 
+      </button>
+
+      <!-- Bouton tutoriel -->
+      <button class="btn btn-primary" onclick="showTutorial()">
+        <i data-lucide="help-circle"></i>
+        Tutoriel
+      </button>
+    </div>
+  </header>
+
+  <!-- Layout principal -->
+  <div id="main">
+    <!-- Bouton toggle sidebar pour mobile -->
+    <button class="sidebar-toggle" id="sidebarToggle">
+      <i data-lucide="menu"></i>
+    </button>
+
+    <!-- Sidebar modernisée -->
+    <div id="sidebar">
+      <!-- Section statistiques générales -->
+      <div class="sidebar-section">
+        <h2 class="section-title">
+          <i data-lucide="bar-chart-3"></i>
+          Statistiques générales
+        </h2>
+        <div class="stats-container">
+          <div class="stat-card">
+            <span class="stat-number" id="totalGardens">0</span>
+            <span class="stat-label">Jardins totaux</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-number" id="sharedGardens">0</span>
+            <span class="stat-label">Jardins partagés</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-number" id="privateGardens">0</span>
+            <span class="stat-label">Jardins privés</span>
+          </div>
+          <!-- Compteur pour jardins familiaux -->
+          <div class="stat-card">
+            <span class="stat-number" id="familyGardens">0</span>
+            <span class="stat-label">Jardins familiaux</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-number" id="totalArea">0</span>
+            <span class="stat-label">Superficie (m²)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section filtres avancés -->
+      <div class="sidebar-section">
+        <h3 class="section-title">
+          <i data-lucide="filter"></i>
+          Filtres
+        </h3>
+        <div class="filter-section">
+          <div class="filter-chip active" data-filter="all">Tous</div>
+          <div class="filter-chip" data-filter="shared">Partagés</div>
+          <div class="filter-chip" data-filter="private">Privés</div>
+          <div class="filter-chip" data-filter="recent">Récents</div>
+        </div>
+        
+        <!-- Filtres par année -->
+        <div style="margin-top: 1rem;">
+          <label style="font-weight: 500; color: var(--text-primary); margin-bottom: 0.5rem; display: block;">
+            <i data-lucide="calendar"></i>
+            Filtrer par années
+          </label>
+          <div id="year-select">
+            <label class="filter-chip"><input type="checkbox" value="2020" checked> 2020</label>
+            <label class="filter-chip"><input type="checkbox" value="2021" checked> 2021</label>
+            <label class="filter-chip"><input type="checkbox" value="2022" checked> 2022</label>
+            <label class="filter-chip"><input type="checkbox" value="2023" checked> 2023</label>
+            <label class="filter-chip"><input type="checkbox" value="2024" checked> 2024</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section liste des jardins -->
+      <div class="sidebar-section">
+        <h3 class="section-title">
+          <i data-lucide="list"></i>
+          Jardins productifs
+        </h3>
+        <div id="jardin-list">
+          <!-- Liste générée dynamiquement -->
+        </div>
+      </div>
+
+      <!-- Section évolution -->
+      <div class="sidebar-section">
+        <h3 class="section-title">
+          <i data-lucide="trending-up"></i>
+          Évolution historique des jardins familiaux
+        </h3>
+        <ul id="liste-evolution" class="garden-list">
+          <!-- Liste générée dynamiquement -->
+        </ul>
+      </div>
+
+      <!-- Section contenu dynamique -->
+      <div id="sidebar-content">
+        <p class="info-message">
+          <i data-lucide="info"></i>
+          Cliquez sur un jardin pour voir les statistiques détaillées.
+        </p>
+      </div>
+    </div>
+
+    <!-- Carte principale -->
+    <div id="map">
+      <!-- Overlay de chargement -->
+      <div class="map-loading" id="mapLoading">
+        <div style="text-align: center;">
+          <div class="loading-spinner"></div>
+          <p style="margin-top: 1rem; color: var(--text-secondary);">Chargement de la carte...</p>
+        </div>
+      </div>
+
+      <!-- Timeline slider pour l'évolution temporelle -->
+      <div class="timeline-container" id="timelineContainer" style="display: none;">
+        <div style="display: flex; align-items: center;">
+          <button class="btn btn-secondary" id="playBtn">
+            <i data-lucide="play"></i>
+          </button>
+          <input type="range" 
+                 class="timeline-slider" 
+                 id="timelineSlider" 
+                 min="1956" 
+                 max="2024" 
+                 value="2024" 
+                 step="1">
+          <span class="timeline-year" id="currentYear">2024</span>
+        </div>
+        <div style="text-align: center; margin-top: 0.5rem; font-size: 0.875rem; color: var(--text-secondary);">
+          Évolution des jardins familiaux dans le temps
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal tutoriel modernisé -->
+    <div id="tutorial">
+      <div class="tutorial-content">
+        <div class="tutorial-header">
+          <h3 class="tutorial-title" id="tutorial-title"></h3>
+          <div class="tutorial-step" id="tutorial-step"></div>
+        </div>
+        <div class="tutorial-body" id="tutorial-content"></div>
+        <div class="tutorial-controls">
+          <div class="tutorial-progress" id="tutorial-progress"></div>
+          <div style="display: flex; gap: 1rem;">
+            <button class="btn btn-secondary" id="tutorial-prev">
+              <i data-lucide="chevron-left"></i>
+              Précédent
+            </button>
+            <button class="btn btn-primary" id="tutorial-next">
+              Suivant
+              <i data-lucide="chevron-right"></i>
+            </button>
+            <button class="btn btn-secondary" id="tutorial-close">
+              <i data-lucide="x"></i>
+              Fermer
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="scripts.js"></script> 
+    
+</body>
+</html>
