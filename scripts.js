@@ -817,7 +817,7 @@ async function handleJardinClickEnhanced(feature) {
       const variete = row["Variétés"] || "Autre";
       if (!aggVar[variete]) aggVar[variete] = 0;
       
-      for (let year = 2020; year <= 2024; year++) {
+      for (let year = 2020; year <= 2026; year++) {
         const value = Number(row[year]) || 0;
         aggVar[variete] += value;
         aggYear[year] += value;
@@ -881,7 +881,7 @@ function addAdvancedCharts(data, aggVar, aggYear) {
         <i data-lucide="filter"></i> Filtrage par années
       </h4>
       <div class="filter-section" style="margin-bottom: 1rem;">
-        ${[2020, 2021, 2022, 2023, 2024]
+        ${[2020, 2021, 2022, 2023, 2024, 2025, 2026]
           .map(y => `<div class="filter-chip active" data-year="${y}">${y}</div>`)
           .join('')}
       </div>
