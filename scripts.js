@@ -1555,7 +1555,7 @@ const tutorialSteps = [
   {
     title: '👨‍💻 À propos du projet',
     content: `
-      <p>Application développée par <strong>Alhassane TAMABDOU</strong> :</p>
+      <p>Application développée par <strong>Alhassane TAMBADOU</strong> :</p>
       <ul style="margin: 1rem 0; padding-left: 1.5rem;">
         <li>🎓 <strong>Master 2 OTG</strong> (Observation de la Terre et Géomatique)</li>
         <li>💻 <strong>Géomaticien / Développeur SIG</strong></li>
@@ -2067,6 +2067,13 @@ function createLegend() {
             <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; color: #059669; font-weight: 500;">
               <i data-lucide="lightbulb"></i>
               <span>Cliquez sur les éléments pour plus d'informations</span>
+            </div>
+          </div>
+
+          <div style="margin-top: 1rem; padding: 0.75rem; background: rgba(16, 185, 129, 0.1); border-radius: 8px; border-left: 3px solid #10b981;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; color: #000000ff; font-weight: 500;">
+              <i data-lucide="lightbulb"></i>
+              <span><strong>Réalisé par Alhassane TAMABDOU / M2 OTG (Observation de la Terre et Géomatique)</strong></span>
             </div>
           </div>
         `;
