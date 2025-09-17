@@ -2022,7 +2022,6 @@ function createLegend() {
             <i data-lucide="map"></i>
             Légende interactive
           </h4>
-          
           <div class="legend-section">
             <strong>🌱 Jardins actuels</strong>
             <div class="legend-item">
@@ -2034,7 +2033,6 @@ function createLegend() {
               <span class="legend-text">Jardins privés (avec données)</span>
             </div>
           </div>
-          
           <div class="legend-section">
             <strong>📅 Évolution historique</strong>
             <div class="legend-item">
@@ -2054,7 +2052,6 @@ function createLegend() {
               <span class="legend-text">Jardins familiaux 2024</span>
             </div>
           </div>
-          
           <div class="legend-section">
             <strong>🏛️ Autres couches</strong>
             <div class="legend-item">
@@ -2063,13 +2060,6 @@ function createLegend() {
             </div>
           </div>
           
-          <div style="margin-top: 1rem; padding: 0.75rem; background: rgba(16, 185, 129, 0.1); border-radius: 8px; border-left: 3px solid #10b981;">
-            <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; color: #059669; font-weight: 500;">
-              <i data-lucide="lightbulb"></i>
-              <span>Cliquez sur les éléments pour plus d'informations</span>
-            </div>
-          </div>
-
           <div style="margin-top: 1rem; padding: 0.75rem; background: rgba(16, 185, 129, 0.1); border-radius: 8px; border-left: 3px solid #10b981;">
             <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; color: #000000ff; font-weight: 500;">
               <i data-lucide="lightbulb"></i>
